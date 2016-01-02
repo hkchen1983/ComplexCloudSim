@@ -168,7 +168,7 @@ public class WorkflowDatacenter extends Datacenter {
      * @param job
      * @param vm
      */
-    private void updateTaskExecTime(Job job, Vm vm) {
+    public void updateTaskExecTime(Job job, Vm vm) {
         double start_time = job.getExecStartTime();
         for (Task task : job.getTaskList()) {
             task.setExecStartTime(start_time);
@@ -188,7 +188,7 @@ public class WorkflowDatacenter extends Datacenter {
      * @pre $none
      * @post $none
      */
-    private void stageInFile2FileSystem(Job job) {
+    public void stageInFile2FileSystem(Job job) {
         List<FileItem> fList = job.getFileList();
 
         for (FileItem file : fList) {

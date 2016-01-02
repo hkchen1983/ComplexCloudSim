@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import complex.cloudsim.ComplexDatacenterBroker;
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.Vm;
@@ -60,8 +62,8 @@ public final class WorkflowEngine extends SimEntity {
     /**
      * The associated scheduler id*
      */
-    private List<Integer> schedulerId;
-    private List<WorkflowScheduler> scheduler;
+    protected List<Integer> schedulerId;
+    protected List<ComplexDatacenterBroker> scheduler;
 
     /**
      * Created a new WorkflowEngine object.
@@ -89,7 +91,7 @@ public final class WorkflowEngine extends SimEntity {
         setSchedulerIds(new ArrayList<>());
 
         for (int i = 0; i < schedulers; i++) {
-            WorkflowScheduler wfs = new WorkflowScheduler(name + "_Scheduler_" + i);
+            ComplexDatacenterBroker wfs = new ComplexDatacenterBroker(name + "_Scheduler_" + i);
             getSchedulers().add(wfs);
             getSchedulerIds().add(wfs.getId());
             wfs.setWorkflowEngineId(this.getId());
@@ -457,7 +459,7 @@ public final class WorkflowEngine extends SimEntity {
      *
      * @return the schedulers
      */
-    public List<WorkflowScheduler> getSchedulers() {
+    public List<ComplexDatacenterBroker> getSchedulers() {
         return this.scheduler;
     }
 
@@ -509,7 +511,7 @@ public final class WorkflowEngine extends SimEntity {
      * @param schedulerId
      * @return the scheduler
      */
-    public WorkflowScheduler getScheduler(int schedulerId) {
+    public ComplexDatacenterBroker getScheduler(int schedulerId) {
         if (this.scheduler != null) {
             return this.scheduler.get(schedulerId);
         }

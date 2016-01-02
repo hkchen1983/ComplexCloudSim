@@ -52,6 +52,7 @@ public class WorkflowScheduler extends DatacenterBroker {
      */
     private int workflowEngineId;
 
+    public int getWorkflowEngineId(){return this.workflowEngineId;}
     /**
      * Created a new WorkflowScheduler object.
      *
