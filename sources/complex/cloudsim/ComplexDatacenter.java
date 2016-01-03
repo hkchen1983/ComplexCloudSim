@@ -40,8 +40,8 @@ public class ComplexDatacenter extends WorkflowDatacenter {
             for (int j=0;j<vmList.size();j++) {
                 ComplexVM vm = (ComplexVM) vmList.get(j);
                 vm.setRuntimeMipsPerPE(0,((double) damageGenerator.nextInt((int) (vm.getDamageRatio()*100))/100));
-                /* Log.printLine("Tick Time:" + currentTick + ",Utilization "+vm.getTotalUtilizationOfCpu(currentTick)+ ", Runtime Mips per  PE:" + vm.getRuntimeMipsPerPE() + ", Actual Mips per PE:"+vm.getMips()/vm.getNumberOfPes());
-                 */
+                //Log.printLine("Tick Time:" + currentTick + ",Utilization "+ vm.getTotalUtilizationOfCpu(currentTick)+ ", Runtime Mips per  PE:" + vm.getRuntimeMipsPerPE() + ", Actual Mips per PE:"+vm.getMips()/vm.getNumberOfPes());
+
             }
             double time = host.updateVmsProcessing(currentTick);
             if (time < smallerTime) {

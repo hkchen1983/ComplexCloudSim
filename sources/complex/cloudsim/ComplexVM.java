@@ -43,10 +43,10 @@ public class ComplexVM extends CondorVM {
     public double updateVmProcessing(double currentTime, List<Double> mipsShare) {
         if (mipsShare != null) {
             for (int i=0;i<mipsShare.size();i++) { // count the CPUs available to the VMM
-                //Log.printLine("current mips is "+ mipsShare.get(i));
+                //Log.printLine(i + "current mips is "+ mipsShare.get(i));
                 if (mipsShare.get(i) > 0) {
                     mipsShare.set(i,getRuntimeMipsPerPE());
-                    //Log.printLine("runtime mips is "+ mipsShare.get(i));
+                    //Log.printLine(i + "runtime mips is "+ mipsShare.get(i));
                 }
             }
             return getCloudletScheduler().updateVmProcessing(currentTime, mipsShare);

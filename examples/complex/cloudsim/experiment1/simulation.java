@@ -28,35 +28,7 @@ import java.util.List;
  * To see how it affect the completion time of the total workload? Minimum, Maximum, Mean, Median, Variance, Std
  */
 public class simulation {
-    protected static List<ComplexVM> createVM(int userId, int vms) {
-        //Creates a container to store VMs. This list is passed to the broker later
-        LinkedList<ComplexVM> list = new LinkedList<>();
 
-        //VM Parameters
-        long size = 10000; //image size (MB)
-        int ram = 512; //vm memory (MB)
-        int mips = 1000;
-        long bw = 1000;
-        int pesNumber = 1; //number of cpus
-        String vmm = "Xen"; //VMM name
-        double damageRatio=0.2;
-
-        //create VMs
-        ComplexVM[] vm = new ComplexVM[vms];
-        for (int i = 0; i < vms; i++) {
-            double ratio = 1.0;
-            vm[i] = new ComplexVM(i, userId, mips * ratio, pesNumber, ram, bw, size, vmm, new CloudletSchedulerSpaceShared());
-            vm[i].setDamageRatio(damageRatio);
-            list.add(vm[i]);
-        }
-        return list;
-    }
-
-    ////////////////////////// STATIC METHODS ///////////////////////
-    /**
-     * Creates main() to run this example This example has only one datacenter
-     * and one storage
-     */
     public static void main(String[] args) {
         try {
             // First step: Initialize the WorkflowSim package.
@@ -65,7 +37,7 @@ public class simulation {
              * the data center or the host doesn't have sufficient resources the
              * exact vmNum would be smaller than that. Take care.
              */
-            int vmNum = 20;//number of vms;
+            int vmNum = 4;//number of vms;
             /**
              * Should change this based on real physical path
              */
@@ -81,7 +53,7 @@ public class simulation {
              * algorithm should be INVALID such that the planner would not
              * override the result of the scheduler
              */
-            Parameters.SchedulingAlgorithm sch_method = Parameters.SchedulingAlgorithm.MINMIN;
+            Parameters.SchedulingAlgorithm sch_method = Parameters.SchedulingAlgorithm.ROUNDROBIN;
             Parameters.PlanningAlgorithm pln_method = Parameters.PlanningAlgorithm.INVALID;
             ReplicaCatalog.FileSystem file_system = ReplicaCatalog.FileSystem.SHARED;
 
@@ -146,6 +118,37 @@ public class simulation {
         }
     }
 
+    protected static List<ComplexVM> createVM(int userId, int vms) {
+        //Creates a container to store VMs. This list is passed to the broker later
+        LinkedList<ComplexVM> list = new LinkedList<>();
+
+        //VM Parameters
+        long size = 10000; //image size (MB)
+        int ram = 4096; //vm memory (MB)
+        int mips = 8000;
+        long bw = 1000;
+        int pesNumber = 8; //number of cpus
+        String vmm = "Xen"; //VMM name
+        double damageRatio=0.2;
+
+        //create VMs
+        ComplexVM[] vm = new ComplexVM[vms];
+        for (int i = 0; i < vms; i++) {
+            double ratio = 1.0;
+            vm[i] = new ComplexVM(i, userId, mips * ratio, pesNumber, ram, bw, size, vmm, new CloudletSchedulerTimeShared());
+            vm[i].setDamageRatio(damageRatio);
+            list.add(vm[i]);
+        }
+        return list;
+    }
+
+    ////////////////////////// STATIC METHODS ///////////////////////
+    /**
+     * Creates main() to run this example This example has only one datacenter
+     * and one storage
+     */
+
+
     protected static ComplexDatacenter createDatacenter(String name) {
 
         // Here are the steps needed to create a PowerDatacenter:
@@ -163,6 +166,12 @@ public class simulation {
             //for a quad-core machine, a list of 4 PEs is required:
             peList1.add(new Pe(0, new PeProvisionerSimple(mips))); // need to store Pe id and MIPS Rating
             peList1.add(new Pe(1, new PeProvisionerSimple(mips)));
+            peList1.add(new Pe(2, new PeProvisionerSimple(mips)));
+            peList1.add(new Pe(3, new PeProvisionerSimple(mips)));
+            peList1.add(new Pe(4, new PeProvisionerSimple(mips)));
+            peList1.add(new Pe(5, new PeProvisionerSimple(mips)));
+            peList1.add(new Pe(6, new PeProvisionerSimple(mips)));
+            peList1.add(new Pe(7, new PeProvisionerSimple(mips)));
 
             int hostId = 0;
             int ram = 2048; //host memory (MB)
