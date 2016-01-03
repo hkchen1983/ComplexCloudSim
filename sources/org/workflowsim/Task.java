@@ -20,7 +20,6 @@ import java.util.List;
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.Consts;
 import org.cloudbus.cloudsim.UtilizationModelFull;
-import org.cloudbus.cloudsim.UtilizationModelStochastic;
 
 /**
  * Task is an extention to Cloudlet in CloudSim. It supports the implementation
@@ -94,7 +93,7 @@ public class Task extends Cloudlet {
          * and utilizationModelBw are just set to be the default mode. You can
          * change it for your own purpose.
          */
-        super(taskId, taskLength, 1, 0, 0, new UtilizationModelStochastic(), new UtilizationModelStochastic(), new UtilizationModelStochastic());
+        super(taskId, taskLength, 1, 0, 0, new UtilizationModelFull(), new UtilizationModelFull(), new UtilizationModelFull());
 
         this.childList = new ArrayList<>();
         this.parentList = new ArrayList<>();
