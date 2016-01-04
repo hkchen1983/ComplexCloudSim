@@ -65,6 +65,14 @@ public final class WorkflowEngine extends SimEntity {
     protected List<Integer> schedulerId;
     protected List<ComplexDatacenterBroker> scheduler;
 
+    protected double workflowFinishTime;
+
+    public void setWorkflowFinishTime(double workflowFinishTime){
+        this.workflowFinishTime=workflowFinishTime;
+    }
+
+    public double getWorkflowFinishTime(){return this.workflowFinishTime;}
+
     /**
      * Created a new WorkflowEngine object.
      *
@@ -227,6 +235,7 @@ public final class WorkflowEngine extends SimEntity {
         getJobsReceivedList().add(job);
         jobsSubmitted--;
         if (getJobsList().isEmpty() && jobsSubmitted == 0) {
+            setWorkflowFinishTime(job.getFinishTime());
             //send msg to all the schedulers
             for (int i = 0; i < getSchedulerIds().size(); i++) {
                 sendNow(getSchedulerId(i), CloudSimTags.END_OF_SIMULATION, null);

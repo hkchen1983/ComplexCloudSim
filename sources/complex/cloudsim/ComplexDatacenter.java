@@ -30,7 +30,7 @@ public class ComplexDatacenter extends WorkflowDatacenter {
     public double getPreviuosTick() {return this.previuosTick;}
 
     protected void updateCloudletProcessing(double currentTick) {
-        Log.printLine("Tick Time:" + currentTick);
+        //Log.printLine("Tick Time:" + currentTick);
         List<? extends Host> list = getVmAllocationPolicy().getHostList();
         double smallerTime = Double.MAX_VALUE;
         Random damageGenerator = new Random();
