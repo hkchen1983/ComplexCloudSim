@@ -1,17 +1,21 @@
-package complex.cloudsim.experiment1;
+package complex.cloudsim.experiment2;
 
+import complex.cloudsim.ComplexDatacenter;
+import complex.cloudsim.ComplexVM;
 import complex.cloudsim.utils.Statistics;
 import org.cloudbus.cloudsim.*;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
-import org.workflowsim.*;
+import org.workflowsim.Job;
+import org.workflowsim.Task;
+import org.workflowsim.WorkflowEngine;
+import org.workflowsim.WorkflowPlanner;
 import org.workflowsim.utils.ClusteringParameters;
 import org.workflowsim.utils.OverheadParameters;
 import org.workflowsim.utils.Parameters;
 import org.workflowsim.utils.ReplicaCatalog;
-import complex.cloudsim.*;
 
 import java.io.File;
 import java.text.DecimalFormat;
@@ -30,17 +34,13 @@ import java.util.List;
  */
 public class simulation {
 
-    public static int numVMs=5;
+    public static int[] numVMs=new int[]{5,10,15,20,25,30,35,40,45,50};
     public static int numRuns=100;
-    public static double damageRatio=0.5;
-    public static double[] FCFSResult = new double[numRuns];
-    public static double[] RoundRobinResult = new double[numRuns];
-    public static double[] MinMinResult = new double[numRuns];
-    public static double[] MaxMinResult = new double[numRuns];
+    public static double damageRatio=0.0;
+    public static List<double[]> resultList = new ArrayList<>();
 
     public static void main(String[] args) {
         try {
-            Log.disable();
             // First step: Initialize the WorkflowSim package.
             /**
              * Should change this based on real physical path
@@ -58,102 +58,75 @@ public class simulation {
             ClusteringParameters cp = new ClusteringParameters(0, 0, method, null);
 
             // For each scheduling algorithm (FCFS,RR,MinMin,MaxMin), run 100 times
-            for (int sche = 0;sche<4;sche++){
-                Parameters.SchedulingAlgorithm sch_method;
-                switch (sche) {
-                    case 0:
-                        sch_method = Parameters.SchedulingAlgorithm.FCFS;
-                        break;
-                    case 1:
-                        sch_method = Parameters.SchedulingAlgorithm.ROUNDROBIN;
-                        break;
-                    case 2:
-                        sch_method = Parameters.SchedulingAlgorithm.MINMIN;
-                        break;
-                    case 3:
-                        sch_method = Parameters.SchedulingAlgorithm.MAXMIN;
-                        break;
-                    default:
-                        sch_method = Parameters.SchedulingAlgorithm.FCFS;
-                }
-                for (int runs=0;runs < numRuns;runs++){
-                    Parameters.init(numVMs, daxPath, null,
-                            null, op, cp, sch_method, pln_method,
-                            null, 0);
-                    ReplicaCatalog.init(file_system);
+            for (int z=0;z<5;z++) {
+                Log.disable();
+                damageRatio+=0.1;
+                resultList = new ArrayList<>();
+                for (int nVMs : numVMs) {
+                    Parameters.SchedulingAlgorithm sch_method;
+                    sch_method = Parameters.SchedulingAlgorithm.ROUNDROBIN;
+                    double[] result = new double[numRuns];
+                    for (int runs = 0; runs < numRuns; runs++) {
+                        Parameters.init(nVMs, daxPath, null,
+                                null, op, cp, sch_method, pln_method,
+                                null, 0);
+                        ReplicaCatalog.init(file_system);
 
-                    // before creating any entities.
-                    int num_user = 1;   // number of grid users
-                    Calendar calendar = Calendar.getInstance();
-                    boolean trace_flag = false;  // mean trace events
+                        // before creating any entities.
+                        int num_user = 1;   // number of grid users
+                        Calendar calendar = Calendar.getInstance();
+                        boolean trace_flag = false;  // mean trace events
 
-                    // Initialize the CloudSim library
-                    CloudSim.init(num_user, calendar, trace_flag);
+                        // Initialize the CloudSim library
+                        CloudSim.init(num_user, calendar, trace_flag);
 
-                    ComplexDatacenter datacenter0 = createDatacenter("Datacenter_0");
+                        ComplexDatacenter datacenter0 = createDatacenter("Datacenter_0");
 
-                    /**
-                     * Create a WorkflowPlanner with one schedulers.
-                     */
-                    WorkflowPlanner wfPlanner = new WorkflowPlanner("planner_0", 1);
-                    /**
-                     * Create a WorkflowEngine.
-                     */
-                    WorkflowEngine wfEngine = wfPlanner.getWorkflowEngine();
-                    /**
-                     * Create a list of VMs.The userId of a vm is basically the id of
-                     * the scheduler that controls this vm.
-                     */
-                    List<ComplexVM> vmlist0 = createVM(wfEngine.getSchedulerId(0));
+                        /**
+                         * Create a WorkflowPlanner with one schedulers.
+                         */
+                        WorkflowPlanner wfPlanner = new WorkflowPlanner("planner_0", 1);
+                        /**
+                         * Create a WorkflowEngine.
+                         */
+                        WorkflowEngine wfEngine = wfPlanner.getWorkflowEngine();
+                        /**
+                         * Create a list of VMs.The userId of a vm is basically the id of
+                         * the scheduler that controls this vm.
+                         */
+                        List<ComplexVM> vmlist0 = createVM(wfEngine.getSchedulerId(0), nVMs, damageRatio);
 
-                    /**
-                     * Submits this list of vms to this WorkflowEngine.
-                     */
-                    wfEngine.submitVmList(vmlist0, 0);
+                        /**
+                         * Submits this list of vms to this WorkflowEngine.
+                         */
+                        wfEngine.submitVmList(vmlist0, 0);
 
-                    /**
-                     * Binds the data centers with the scheduler.
-                     */
-                    wfEngine.bindSchedulerDatacenter(datacenter0.getId(), 0);
-                    CloudSim.startSimulation();
-                    List<Job> outputList0 = wfEngine.getJobsReceivedList();
-                    CloudSim.stopSimulation();
-                    switch (sche) {
-                        case 0:
-                            FCFSResult[runs]=wfEngine.getWorkflowFinishTime();
-                            break;
-                        case 1:
-                            RoundRobinResult[runs]=wfEngine.getWorkflowFinishTime();
-                            break;
-                        case 2:
-                            MinMinResult[runs]=wfEngine.getWorkflowFinishTime();
-                            break;
-                        case 3:
-                            MaxMinResult[runs]=wfEngine.getWorkflowFinishTime();
-                            break;
-                        default:
-                            FCFSResult[runs]=wfEngine.getWorkflowFinishTime();
-                            break;
+                        /**
+                         * Binds the data centers with the scheduler.
+                         */
+                        wfEngine.bindSchedulerDatacenter(datacenter0.getId(), 0);
+                        CloudSim.startSimulation();
+                        List<Job> outputList0 = wfEngine.getJobsReceivedList();
+                        CloudSim.stopSimulation();
+                        result[runs] = wfEngine.getWorkflowFinishTime();
                     }
-
+                    resultList.add(result);
                 }
                 Log.enable();
-                Log.printLine("------ "+ numVMs + " VMs " + numRuns + " Runs with Damage Ratio "+ damageRatio + "------");
-                Log.printLine( ">> FCFS");
-                printResult(FCFSResult);
-                Log.printLine( ">> RoundRobin");
-                printResult(RoundRobinResult);
-                Log.printLine( ">> MinMin");
-                printResult(MinMinResult);
-                Log.printLine( ">> MaxMin");
-                printResult(MaxMinResult);
+                Log.printLine("------ FCFS [5 10 15 20 25] VMs" + numRuns + " Runs with Damage Ratio " + damageRatio + "------");
+                for (int i = 0; i < resultList.size(); i++) {
+                    Log.printLine("------ " + (i + 1) * 5 + " VMs ------");
+                    printResult(resultList.get(i));
+                }
             }
+
         } catch (Exception e) {
             Log.printLine("The simulation has been terminated due to an unexpected error");
         }
     }
 
-    protected static List<ComplexVM> createVM(int userId) {
+
+    protected static List<ComplexVM> createVM(int userId, int nVMs,double damageRatio) {
         //Creates a container to store VMs. This list is passed to the broker later
         LinkedList<ComplexVM> list = new LinkedList<>();
 
@@ -166,8 +139,8 @@ public class simulation {
         String vmm = "Xen"; //VMM name
 
         //create VMs
-        ComplexVM[] vm = new ComplexVM[numVMs];
-        for (int i = 0; i < numVMs; i++) {
+        ComplexVM[] vm = new ComplexVM[nVMs];
+        for (int i = 0; i < nVMs; i++) {
             double ratio = 1.0;
             vm[i] = new ComplexVM(i, userId, mips * ratio, pesNumber, ram, bw, size, vmm, new CloudletSchedulerSpaceShared());
             vm[i].setDamageRatio(damageRatio);
@@ -193,7 +166,7 @@ public class simulation {
         // 2. A Machine contains one or more PEs or CPUs/Cores. Therefore, should
         //    create a list to store these PEs before creating
         //    a Machine.
-        for (int i = 1; i <= 20; i++) {
+        for (int i = 1; i <= 100; i++) {
             List<Pe> peList1 = new ArrayList<>();
             int mips = 32000;
             // 3. Create PEs and add these into the list.
@@ -257,8 +230,11 @@ public class simulation {
         Statistics statisticResult=new Statistics(result);
         Log.printLine("Mean :" + statisticResult.getMean());
         Log.printLine("Median : " + statisticResult.median());
+        Log.printLine("Minimum : " + statisticResult.minValue);
+        Log.printLine("Maximum : " + statisticResult.maxValue);
         Log.printLine("Variance : " + statisticResult.getVariance());
         Log.printLine("Std : " + statisticResult.getStdDev());
+        Log.printLine("Coefficient of variation : " + statisticResult.getCOV());
     }
     /**
      * Prints the job objects

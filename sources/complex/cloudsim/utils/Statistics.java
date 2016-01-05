@@ -8,11 +8,17 @@ import java.util.Arrays;
 public class Statistics {
     double[] data;
     int size;
+    public double minValue;
+    public double maxValue;
 
     public Statistics(double[] data)
     {
         this.data = data;
         size = data.length;
+    }
+
+    public double getCOV(){
+        return getStdDev()/getMean();
     }
 
     public double getMean()
@@ -40,6 +46,8 @@ public class Statistics {
     public double median()
     {
         Arrays.sort(data);
+        this.minValue=data[0];
+        this.maxValue=data[data.length-1];
 
         if (data.length % 2 == 0)
         {
